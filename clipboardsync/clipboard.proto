@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package clipboardsync;
+
+service ClipboardSync {
+    rpc SendClipboard (Clipboard) returns (Copied) {}
+}
+
+message Clipboard {
+    string data = 1;
+}
+
+message Copied {
+    bool success = 1;
+}
