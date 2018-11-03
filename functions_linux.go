@@ -3,8 +3,13 @@
 package main
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/atotto/clipboard"
+)
+
+const (
+	address = "192.168.122.193:9002"
 )
 
 func monitorClipboard() {
@@ -15,7 +20,10 @@ func monitorClipboard() {
 
 		select {
 		case <-delay:
-			fmt.Println("Not yet implemented")
+			cb, err := clipboard.ReadAll()
+			if err == nil {
+				syncClipoard(cb)
+			}
 		}
 	}
 }

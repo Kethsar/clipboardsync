@@ -2,17 +2,12 @@ package main
 
 import (
 	"fmt"
-	pb "kethsar/clipboardsync/clipboardsync"
+	pb "kethsar/clipboardsync/clipboard_proto"
 	"log"
 	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-)
-
-const (
-	port    = ":9002"
-	address = "192.168.1.10:9002"
 )
 
 var (
@@ -29,6 +24,7 @@ func syncClipoard(text string) {
 		return
 	}
 	cboard = text
+	fmt.Printf("New clipboard text: %s\n\n", text)
 
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
@@ -41,7 +37,7 @@ func syncClipoard(text string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	ret, err := client.SendClipboard(ctx, &pb.Clipboard{Data: "yes"})
+	ret, err := client.SendClipboard(ctx, &pb.Clipboard{Data: text})
 	fmt.Printf("Clipboard Copied: %t\n", ret.Success)
 	if err != nil {
 		log.Printf("Error sending clipboard: %v", err)

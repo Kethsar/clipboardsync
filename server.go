@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	pb "kethsar/clipboardsync/clipboardsync"
+	pb "kethsar/clipboardsync/clipboard_proto"
 	"log"
 	"net"
 
@@ -11,13 +11,18 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	port = ":9002"
+)
+
 type csServer struct{}
 
 func (css *csServer) SendClipboard(ctx context.Context, in *pb.Clipboard) (*pb.Copied, error) {
 	// Copy data to clipboard
-	fmt.Printf("New Clipboard data: %s\n\n", in.Data)
-	err := clipboard.WriteAll(in.Data)
+	cboard = in.Data
+	fmt.Printf("New Clipboard data: %s\n\n", cboard)
 
+	err := clipboard.WriteAll(cboard)
 	if err != nil {
 		return &pb.Copied{Success: false}, err
 	}
