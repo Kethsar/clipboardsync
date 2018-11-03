@@ -16,8 +16,7 @@ const (
 )
 
 var (
-	client pb.ClipboardSyncClient
-	server csServer
+	cboard string
 )
 
 func main() {
@@ -26,6 +25,11 @@ func main() {
 }
 
 func syncClipoard(text string) {
+	if text == cboard {
+		return
+	}
+	cboard = text
+
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		fmt.Printf("Failed to connect: %v\n", err)
@@ -33,7 +37,7 @@ func syncClipoard(text string) {
 	}
 	defer conn.Close()
 
-	client = pb.NewClipboardSyncClient(conn)
+	client := pb.NewClipboardSyncClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
