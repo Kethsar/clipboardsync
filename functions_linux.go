@@ -13,17 +13,12 @@ const (
 )
 
 func monitorClipboard() {
-	delay := make(<-chan time.Time)
+	delay := time.NewTicker(500 * time.Millisecond)
 
-	for {
-		delay = time.After(500 * time.Millisecond)
-
-		select {
-		case <-delay:
-			cb, err := clipboard.ReadAll()
-			if err == nil {
-				syncClipoard(cb)
-			}
+	for range delay.C {
+		cb, err := clipboard.ReadAll()
+		if err == nil {
+			syncClipoard(cb)
 		}
 	}
 }

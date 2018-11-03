@@ -15,29 +15,24 @@ const (
 )
 
 var (
-	u32                            = syscall.NewLazyDLL("user32.dll")
-	procGetClipboardSequenceNumber = u32.NewProc("GetClipboardSequenceNumber")
-	cbSeq                          uintptr
+	u32             = syscall.NewLazyDLL("user32.dll")
+	getClipSequence = u32.NewProc("GetClipboardSequenceNumber")
+	cbSeq           uintptr
 )
 
 func monitorClipboard() {
-	delay := make(<-chan time.Time)
+	delay := time.NewTicker(500 * time.Millisecond)
 
-	for {
-		delay = time.After(500 * time.Millisecond)
+	for range delay.C {
+		r1, _, _ := getClipSequence.Call()
+		if r1 != cbSeq {
+			cbSeq = r1
 
-		select {
-		case <-delay:
-			r1, _, _ := procGetClipboardSequenceNumber.Call()
-			if r1 != cbSeq {
-				cbSeq = r1
-
-				cb, err := clipboard.ReadAll()
-				if err != nil {
-					fmt.Printf("Error reading clipboard: %v\n", err)
-				} else {
-					syncClipoard(cb)
-				}
+			cb, err := clipboard.ReadAll()
+			if err != nil {
+				fmt.Printf("Error reading clipboard: %v\n", err)
+			} else {
+				syncClipoard(cb)
 			}
 		}
 	}
