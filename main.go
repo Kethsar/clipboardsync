@@ -27,7 +27,7 @@ func syncClipoard(text string) {
 
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		printToConsole(fmt.Sprintf("Failed to connect: %v\n", err))
+		printToConsole(fmt.Sprintf("Failed to connect: %v", err))
 		return
 	}
 	defer conn.Close()

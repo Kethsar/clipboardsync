@@ -30,7 +30,7 @@ func monitorClipboard() {
 
 			cb, err := clipboard.ReadAll()
 			if err != nil {
-				printToConsole(fmt.Sprintf("Error reading clipboard: %v\n", err))
+				printToConsole(fmt.Sprintf("Error reading clipboard: %v", err))
 			} else {
 				syncClipoard(cb)
 			}
