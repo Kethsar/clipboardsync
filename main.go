@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	pb "kethsar/clipboardsync/clipboard_proto"
-	"log"
+	"sync"
 	"time"
 
 	"golang.org/x/net/context"
@@ -12,6 +12,7 @@ import (
 
 var (
 	cboard string
+	mux    sync.Mutex
 )
 
 func main() {
@@ -20,17 +21,13 @@ func main() {
 }
 
 func syncClipoard(text string) {
-	if text == cboard {
+	if !setClipboard(text) {
 		return
 	}
-	cboard = text
-
-	t := time.Now()
-	fmt.Printf("[%d/%02d/%02d %02d:%02d:%02d] New clipboard sent\n", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		fmt.Printf("Failed to connect: %v\n", err)
+		printToConsole(fmt.Sprintf("Failed to connect: %v\n", err))
 		return
 	}
 	defer conn.Close()
@@ -41,6 +38,26 @@ func syncClipoard(text string) {
 
 	_, err = client.SendClipboard(ctx, &pb.Clipboard{Data: text})
 	if err != nil {
-		log.Printf("Error sending clipboard: %v", err)
+		printToConsole(fmt.Sprintf("Error sending clipboard: %v", err))
+		return
 	}
+
+	printToConsole("New clipboard sent")
+}
+
+func setClipboard(cb string) bool {
+	mux.Lock()
+	defer mux.Unlock()
+
+	if cb == cboard {
+		return false
+	}
+
+	cboard = cb
+	return true
+}
+
+func printToConsole(text string) {
+	t := time.Now()
+	fmt.Printf("[%d/%02d/%02d %02d:%02d:%02d] %s\n", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), text)
 }
