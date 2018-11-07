@@ -3,7 +3,7 @@ syntax = "proto3";
 package clipboardsync;
 
 service ClipboardSync {
-    rpc SendClipboard (Clipboard) returns (Copied) {}
+    rpc Sync (Clipboard) returns (Copied) {}
 }
 
 message Clipboard {

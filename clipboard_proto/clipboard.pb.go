@@ -108,16 +108,16 @@ func init() {
 func init() { proto.RegisterFile("clipboard.proto", fileDescriptor_72275e738ef73aac) }
 
 var fileDescriptor_72275e738ef73aac = []byte{
-	// 140 bytes of a gzipped FileDescriptorProto
+	// 136 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4f, 0xce, 0xc9, 0x2c,
 	0x48, 0xca, 0x4f, 0x2c, 0x4a, 0xd1, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x85, 0x0b, 0x14,
 	0x57, 0xe6, 0x25, 0x2b, 0xc9, 0x73, 0x71, 0x3a, 0xc3, 0x04, 0x84, 0x84, 0xb8, 0x58, 0x52, 0x12,
 	0x4b, 0x12, 0x25, 0x18, 0x15, 0x18, 0x35, 0x38, 0x83, 0xc0, 0x6c, 0x25, 0x25, 0x2e, 0x36, 0xe7,
 	0xfc, 0x82, 0xcc, 0xd4, 0x14, 0x21, 0x09, 0x2e, 0xf6, 0xe2, 0xd2, 0xe4, 0xe4, 0xd4, 0xe2, 0x62,
-	0xb0, 0x02, 0x8e, 0x20, 0x18, 0xd7, 0x28, 0x98, 0x8b, 0x17, 0x6e, 0x48, 0x70, 0x65, 0x5e, 0xb2,
-	0x90, 0x13, 0x17, 0x6f, 0x70, 0x6a, 0x5e, 0x0a, 0xc2, 0x64, 0x09, 0x3d, 0x14, 0x6b, 0xf5, 0xe0,
-	0x32, 0x52, 0xa2, 0xe8, 0x32, 0x60, 0xcb, 0x94, 0x18, 0x92, 0xd8, 0xc0, 0xee, 0x35, 0x06, 0x04,
-	0x00, 0x00, 0xff, 0xff, 0x9e, 0x7a, 0x02, 0xd7, 0xc2, 0x00, 0x00, 0x00,
+	0xb0, 0x02, 0x8e, 0x20, 0x18, 0xd7, 0xc8, 0x8b, 0x8b, 0x17, 0x6e, 0x48, 0x70, 0x65, 0x5e, 0xb2,
+	0x90, 0x25, 0x17, 0x0b, 0x98, 0x96, 0xd0, 0x43, 0xb1, 0x4d, 0x0f, 0xae, 0x4a, 0x4a, 0x14, 0x5d,
+	0x06, 0x6c, 0x87, 0x12, 0x43, 0x12, 0x1b, 0xd8, 0x99, 0xc6, 0x80, 0x00, 0x00, 0x00, 0xff, 0xff,
+	0x59, 0xe4, 0x24, 0x99, 0xb9, 0x00, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -132,7 +132,7 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ClipboardSyncClient interface {
-	SendClipboard(ctx context.Context, in *Clipboard, opts ...grpc.CallOption) (*Copied, error)
+	Sync(ctx context.Context, in *Clipboard, opts ...grpc.CallOption) (*Copied, error)
 }
 
 type clipboardSyncClient struct {
@@ -143,9 +143,9 @@ func NewClipboardSyncClient(cc *grpc.ClientConn) ClipboardSyncClient {
 	return &clipboardSyncClient{cc}
 }
 
-func (c *clipboardSyncClient) SendClipboard(ctx context.Context, in *Clipboard, opts ...grpc.CallOption) (*Copied, error) {
+func (c *clipboardSyncClient) Sync(ctx context.Context, in *Clipboard, opts ...grpc.CallOption) (*Copied, error) {
 	out := new(Copied)
-	err := c.cc.Invoke(ctx, "/clipboardsync.ClipboardSync/SendClipboard", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/clipboardsync.ClipboardSync/Sync", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -154,27 +154,27 @@ func (c *clipboardSyncClient) SendClipboard(ctx context.Context, in *Clipboard, 
 
 // ClipboardSyncServer is the server API for ClipboardSync service.
 type ClipboardSyncServer interface {
-	SendClipboard(context.Context, *Clipboard) (*Copied, error)
+	Sync(context.Context, *Clipboard) (*Copied, error)
 }
 
 func RegisterClipboardSyncServer(s *grpc.Server, srv ClipboardSyncServer) {
 	s.RegisterService(&_ClipboardSync_serviceDesc, srv)
 }
 
-func _ClipboardSync_SendClipboard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ClipboardSync_Sync_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Clipboard)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ClipboardSyncServer).SendClipboard(ctx, in)
+		return srv.(ClipboardSyncServer).Sync(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/clipboardsync.ClipboardSync/SendClipboard",
+		FullMethod: "/clipboardsync.ClipboardSync/Sync",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClipboardSyncServer).SendClipboard(ctx, req.(*Clipboard))
+		return srv.(ClipboardSyncServer).Sync(ctx, req.(*Clipboard))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -184,8 +184,8 @@ var _ClipboardSync_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*ClipboardSyncServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SendClipboard",
-			Handler:    _ClipboardSync_SendClipboard_Handler,
+			MethodName: "Sync",
+			Handler:    _ClipboardSync_Sync_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

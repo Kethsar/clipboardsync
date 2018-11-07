@@ -36,7 +36,7 @@ func syncClipoard(text string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err = client.SendClipboard(ctx, &pb.Clipboard{Data: text})
+	_, err = client.Sync(ctx, &pb.Clipboard{Data: text})
 	if err != nil {
 		printToConsole(fmt.Sprintf("Error sending clipboard: %v", err))
 		return

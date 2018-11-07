@@ -16,7 +16,7 @@ const (
 
 type csServer struct{}
 
-func (css *csServer) SendClipboard(ctx context.Context, in *pb.Clipboard) (*pb.Copied, error) {
+func (css *csServer) Sync(ctx context.Context, in *pb.Clipboard) (*pb.Copied, error) {
 	// Copy data to clipboard
 	if !setClipboard(in.Data) {
 		return &pb.Copied{Success: false}, nil
