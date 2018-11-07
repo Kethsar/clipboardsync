@@ -24,7 +24,9 @@ func syncClipoard(text string) {
 		return
 	}
 	cboard = text
-	fmt.Printf("New clipboard text: %s\n\n", text)
+
+	t := time.Now()
+	fmt.Printf("[%d/%02d/%02d %02d:%02d:%02d] New clipboard sent\n", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {

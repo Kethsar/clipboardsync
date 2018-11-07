@@ -5,6 +5,7 @@ import (
 	pb "kethsar/clipboardsync/clipboard_proto"
 	"log"
 	"net"
+	"time"
 
 	"github.com/atotto/clipboard"
 	"golang.org/x/net/context"
@@ -20,7 +21,9 @@ type csServer struct{}
 func (css *csServer) SendClipboard(ctx context.Context, in *pb.Clipboard) (*pb.Copied, error) {
 	// Copy data to clipboard
 	cboard = in.Data
-	fmt.Printf("New Clipboard data: %s\n\n", cboard)
+
+	t := time.Now()
+	fmt.Printf("[%d/%02d/%02d %02d:%02d:%02d] New clipboard received\n", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 
 	err := clipboard.WriteAll(cboard)
 	if err != nil {
