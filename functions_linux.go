@@ -3,16 +3,55 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/BurntSushi/xgb/xfixes"
+	"github.com/BurntSushi/xgb/xproto"
+	"github.com/BurntSushi/xgbutil"
 	"github.com/atotto/clipboard"
 )
 
 const (
 	address = "192.168.122.193:9002"
+	cb      = "CLIPBOARD"
+)
+
+var (
+	cbatom xproto.Atom
 )
 
 func monitorClipboard() {
+	xu, err := registerClipboardEvents()
+
+	if err != nil {
+		printToConsole(fmt.Sprintf("Error setting up event listening: %v", err))
+		printToConsole("Using clipboard polling instead")
+	} else {
+		err = eventListening(xu)
+		printToConsole(fmt.Sprintf("Error during event listening: %v", err))
+		printToConsole("Switching to clipboard polling")
+	}
+
+	pollClipboard()
+}
+
+func eventListening(xu *xgbutil.XUtil) error {
+	for {
+		_, xgberr := xu.Conn().WaitForEvent()
+
+		if xgberr != nil {
+			return xgberr
+		}
+
+		cb, err := clipboard.ReadAll()
+		if err == nil {
+			syncClipoard(cb)
+		}
+	}
+}
+
+func pollClipboard() {
 	delay := time.NewTicker(500 * time.Millisecond)
 
 	for range delay.C {
@@ -21,4 +60,31 @@ func monitorClipboard() {
 			syncClipoard(cb)
 		}
 	}
+}
+
+func registerClipboardEvents() (*xgbutil.XUtil, error) {
+	xu, err := xgbutil.NewConn()
+	if err != nil {
+		return nil, err
+	}
+
+	err = xfixes.Init(xu.Conn())
+	if err != nil {
+		return nil, err
+	}
+
+	cbinternatom, err := xproto.InternAtom(xu.Conn(), false, uint16(len(cb)), cb).Reply()
+	if err != nil {
+		return nil, err
+	}
+	cbatom = cbinternatom.Atom
+
+	_, err = xfixes.QueryVersion(xu.Conn(), 5, 0).Reply()
+	if err != nil {
+		return nil, err
+	}
+
+	xfixes.SelectSelectionInput(xu.Conn(), xu.RootWin(), cbatom, xfixes.SelectionEventMaskSetSelectionOwner)
+
+	return xu, nil
 }
