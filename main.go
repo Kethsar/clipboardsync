@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	pb "kethsar/clipboardsync/clipboard_proto"
 	"sync"
 	"time"
+
+	pb "github.com/Kethsar/clipboardsync/clipboard_proto"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"

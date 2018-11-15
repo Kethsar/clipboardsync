@@ -1,9 +1,10 @@
 package main
 
 import (
-	pb "kethsar/clipboardsync/clipboard_proto"
 	"log"
 	"net"
+
+	pb "github.com/Kethsar/clipboardsync/clipboard_proto"
 
 	"github.com/atotto/clipboard"
 	"golang.org/x/net/context"
