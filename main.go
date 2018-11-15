@@ -57,6 +57,7 @@ func setClipboard(cb string) bool {
 	return true
 }
 
+// Eh, I like formatted timestamps
 func printToConsole(text string) {
 	t := time.Now()
 	fmt.Printf("[%d/%02d/%02d %02d:%02d:%02d] %s\n", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), text)

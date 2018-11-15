@@ -21,6 +21,7 @@ var (
 	cbatom xproto.Atom
 )
 
+// Attempt to listen for selection events, else just poll the clipboard
 func monitorClipboard() {
 	xu, err := registerClipboardEvents()
 
@@ -38,8 +39,13 @@ func monitorClipboard() {
 
 func eventListening(xu *xgbutil.XUtil) error {
 	for {
+		/*
+			We don't actually care about the event returned
+			since we only registered for selection "CLIPBOARD" owner changes
+		*/
 		_, xgberr := xu.Conn().WaitForEvent()
 
+		// If we ever get an error, just stop, since I don't know of a good way to recover
 		if xgberr != nil {
 			return xgberr
 		}
@@ -62,6 +68,7 @@ func pollClipboard() {
 	}
 }
 
+// Set up "CLIPBOARD" selection owner change event notifications
 func registerClipboardEvents() (*xgbutil.XUtil, error) {
 	xu, err := xgbutil.NewConn()
 	if err != nil {
@@ -79,6 +86,10 @@ func registerClipboardEvents() (*xgbutil.XUtil, error) {
 	}
 	cbatom = cbinternatom.Atom
 
+	/*
+		We don't actually care about what version is available, since any works
+		But this is required before we can call SelectSelectionInput
+	*/
 	_, err = xfixes.QueryVersion(xu.Conn(), 5, 0).Reply()
 	if err != nil {
 		return nil, err
