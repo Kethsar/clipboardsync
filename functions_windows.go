@@ -7,9 +7,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/AllenDang/w32"
+	"github.com/Kethsar/w32"
 
-	"github.com/AllenDang/gform"
+	"github.com/Kethsar/gform"
 
 	"github.com/atotto/clipboard"
 )
