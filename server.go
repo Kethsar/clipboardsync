@@ -11,10 +11,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-const (
-	port = ":9002"
-)
-
 type csServer struct{}
 
 func (css *csServer) Sync(ctx context.Context, in *pb.Clipboard) (*pb.Copied, error) {
@@ -34,7 +30,7 @@ func (css *csServer) Sync(ctx context.Context, in *pb.Clipboard) (*pb.Copied, er
 }
 
 func startServer() {
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", c.Port)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v\n", err)
 	}

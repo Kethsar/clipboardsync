@@ -13,12 +13,11 @@ import (
 )
 
 const (
-	address = "192.168.122.193:9002"
-	cb      = "CLIPBOARD"
+	cb = "CLIPBOARD"
 )
 
 var (
-	cbatom xproto.Atom
+	cbatom xproto.Atom // This probably isn't actually needed
 )
 
 // Attempt to listen for selection events, else just poll the clipboard

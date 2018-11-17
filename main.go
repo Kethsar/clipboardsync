@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"sync"
 	"time"
+
+	"github.com/awused/awconf"
 
 	pb "github.com/Kethsar/clipboardsync/clipboard_proto"
 
@@ -11,12 +14,24 @@ import (
 	"google.golang.org/grpc"
 )
 
+type config struct {
+	Port    string
+	Server  string
+	Timeout int
+}
+
 var (
 	cboard string
 	mux    sync.Mutex
+	c      *config
 )
 
 func main() {
+	err := awconf.LoadConfig("clipboardsync", &c)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	go startServer()
 	monitorClipboard()
 }
@@ -26,7 +41,7 @@ func syncClipoard(text string) {
 		return
 	}
 
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	conn, err := grpc.Dial(c.Server, grpc.WithInsecure())
 	if err != nil {
 		printToConsole(fmt.Sprintf("Failed to connect: %v", err))
 		return
@@ -34,7 +49,7 @@ func syncClipoard(text string) {
 	defer conn.Close()
 
 	client := pb.NewClipboardSyncClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.Timeout)*time.Millisecond)
 	defer cancel()
 
 	_, err = client.Sync(ctx, &pb.Clipboard{Data: text})

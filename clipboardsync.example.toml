@@ -1,0 +1,8 @@
+# The port to listen on, with a colon in front of it
+Port = ":9001"
+
+# The address:port to send to when the clipboard changes
+Server = "192.168.1.5:9001"
+
+# Timeout for sending a clipboard, in miliseconds
+Timeout = 1000

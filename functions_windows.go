@@ -14,10 +14,6 @@ import (
 	"github.com/atotto/clipboard"
 )
 
-const (
-	address = "192.168.1.10:9002"
-)
-
 var (
 	cbWin *gform.Form // This is to make sure we keep it in memory, I guess
 )

@@ -1,3 +1,4 @@
 *.exe
 *~
 clipboardsync
+clipboardsync.toml
