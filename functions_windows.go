@@ -43,6 +43,7 @@ func createWindow() bool {
 	return w32.AddClipboardFormatListener(cbWin.Handle())
 }
 
+// Automatically called when Windows sends us a CLIPBOARDUPDATE event message
 func cbUpdateHandler(arg *gform.EventArg) {
 	if data, ok := arg.Data().(*gform.RawMsg); ok {
 		if data.Msg == w32.WM_CLIPBOARDUPDATE &&

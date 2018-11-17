@@ -36,6 +36,7 @@ func main() {
 	monitorClipboard()
 }
 
+// Send the clipboard to the server specified in the config if it is different
 func syncClipoard(text string) {
 	if !setClipboard(text) {
 		return
@@ -61,6 +62,7 @@ func syncClipoard(text string) {
 	printToConsole("New clipboard sent")
 }
 
+// We have multiple threads accessing cboard, so use a mute when accessing it
 func setClipboard(cb string) bool {
 	mux.Lock()
 	defer mux.Unlock()
