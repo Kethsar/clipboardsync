@@ -3,13 +3,9 @@ syntax = "proto3";
 package clipboardsync;
 
 service ClipboardSync {
-    rpc Sync (Clipboard) returns (Copied) {}
+    rpc Sync (stream Clipboard) returns (stream Clipboard) {}
 }
 
 message Clipboard {
     string data = 1;
-}
-
-message Copied {
-    bool success = 1;
 }

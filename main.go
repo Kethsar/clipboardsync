@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -10,7 +11,6 @@ import (
 
 	pb "github.com/Kethsar/clipboardsync/clipboard_proto"
 
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
