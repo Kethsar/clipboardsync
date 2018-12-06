@@ -44,6 +44,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	// Start in the proper mode(s)
 	if c.Mode == serverMode {
 		startServer()
 	}
@@ -53,6 +54,11 @@ func main() {
 	}
 
 	if c.Mode == clientMode || c.Mode == dualMode {
+		/*
+			Start the client and clipboard monitor on different threads
+			The client thread closes waitc if it exceeds max connection attempts
+			Could potentially run startClient after monitorClipboard to avoid that
+		*/
 		waitc = make(chan struct{})
 		go startClient()
 		go monitorClipboard()
@@ -60,6 +66,7 @@ func main() {
 	}
 }
 
+// Attempt to create the client connection to the server, retrying as needed
 func startClient() {
 	attempts := 0
 	delaySecs := c.RetryInterval

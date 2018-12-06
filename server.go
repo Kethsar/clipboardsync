@@ -20,15 +20,17 @@ func (css *csServer) Sync(stream pb.ClipboardSync_SyncServer) error {
 	printToConsole("Server: Client connected")
 	clients[stream] = true
 
-	if cboard != "" {
+	if cboard != "" { // Send the currently stored clipboard, if it exists
 		stream.Send(&pb.Clipboard{Data: cboard})
 	}
 
+	// Loop and attempt to read new data from the client
 	for {
 		in, err := stream.Recv()
 		if err != nil {
 			printToConsole("Server: Client disconnected")
 
+			// Remove the client from our list of clients, since we lost them
 			smux.Lock()
 			delete(clients, stream)
 			smux.Unlock()
@@ -40,6 +42,7 @@ func (css *csServer) Sync(stream pb.ClipboardSync_SyncServer) error {
 			return nil
 		}
 
+		// Send clipboard out only if it is different
 		if setClipboard(in.GetData()) {
 			printToConsole("Server: New clipboard received")
 			propagate(cboard, stream)
@@ -47,6 +50,7 @@ func (css *csServer) Sync(stream pb.ClipboardSync_SyncServer) error {
 	}
 }
 
+// Send the specified text to all connected clients, except the one that sent it to the server
 func propagate(text string, source pb.ClipboardSync_SyncServer) {
 	smux.Lock()
 	defer smux.Unlock()
