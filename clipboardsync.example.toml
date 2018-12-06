@@ -9,3 +9,11 @@ Server = "192.168.1.5:9001"
 # 2 = Server
 # 3 = both
 Mode = 1
+
+# How often to attempt to connecting to the server for the client, in seconds
+# Minimum value of 5, anything lower will default to 5
+RetryInterval = 5
+
+# How many times to attempt connecting before quitting
+# 0 means try forever
+MaxRetries = 10

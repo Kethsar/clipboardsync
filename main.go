@@ -17,9 +17,11 @@ import (
 )
 
 type config struct {
-	Port   string
-	Server string
-	Mode   int
+	Port          string
+	Server        string
+	Mode          int
+	RetryInterval time.Duration
+	MaxRetries    int
 }
 
 const (
@@ -56,12 +58,23 @@ func main() {
 }
 
 func startClient() {
-	delay := time.NewTicker(30 * time.Second)
+	attempts := 0
+	delaySecs := c.RetryInterval
+	if delaySecs < 5 {
+		delaySecs = 5
+	}
+	delay := time.NewTicker(delaySecs * time.Second)
 
 	for {
+		attempts++
+
 		conn, err := grpc.Dial(c.Server, grpc.WithInsecure())
 		if err != nil {
 			printToConsole(fmt.Sprintf("Client: Failed to connect: %s", err))
+			if attempts >= c.MaxRetries {
+				break
+			}
+
 			printToConsole("Will retry in 30 seconds")
 			<-delay.C
 			continue
@@ -70,12 +83,18 @@ func startClient() {
 		client := pb.NewClipboardSyncClient(conn)
 		stream, err = client.Sync(context.Background())
 		if err != nil {
-			printToConsole(fmt.Sprintf("Client: Error creating stream: %s", err))
-			printToConsole("Will retry in 30 seconds")
 			conn.Close()
+			printToConsole(fmt.Sprintf("Client: Error creating stream: %s", err))
+			if attempts >= c.MaxRetries {
+				break
+			}
+
+			printToConsole("Will retry in 30 seconds")
 			<-delay.C
 			continue
 		}
+
+		attempts = 0
 
 		printToConsole("Client: Stream opened")
 		monitorClientStream()
@@ -85,6 +104,7 @@ func startClient() {
 		stream = nil
 		conn.Close()
 	}
+	delay.Stop()
 }
 
 // Continously monitor the stream, break when receiving errors
