@@ -4,5 +4,8 @@ Port = ":9001"
 # The address:port to send to when the clipboard changes
 Server = "192.168.1.5:9001"
 
-# Timeout for sending a clipboard, in miliseconds
-Timeout = 1000
+# Mode to run in.
+# 1 = Client
+# 2 = Server
+# 3 = both
+Mode = 1

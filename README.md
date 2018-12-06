@@ -25,8 +25,7 @@ The config file is searched for using [awconf](https://github.com/awused/awconf)
 
 ## TODO
 - One server, many clients. Server, Client, and dual mode
-  - Function for client to register and de-register itself with the server
-  - Function to tell clients the server is shutting down
-  - Function for server to check if a client is still running
-  - State persistence for server using the above function on start to look for clients
+  - Make the Sync RPC function use streams
+  - Keep connection open and send data back and forth
+  - Client auto-attempts reconnection ever X seconds when disconnected
 - Possibly encrypt the clipboard to make this safe for use if anything is not on the local network

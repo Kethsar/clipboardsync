@@ -1,32 +1,53 @@
 package main
 
 import (
+	"io"
 	"log"
 	"net"
+	"sync"
 
 	pb "github.com/Kethsar/clipboardsync/clipboard_proto"
 
-	"github.com/atotto/clipboard"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
 type csServer struct{}
 
-func (css *csServer) Sync(ctx context.Context, in *pb.Clipboard) (*pb.Copied, error) {
-	// Copy data to clipboard
-	if !setClipboard(in.Data) {
-		return &pb.Copied{Success: false}, nil
+var clients map[pb.ClipboardSync_SyncServer]bool
+var smux sync.Mutex
+
+func (css *csServer) Sync(stream pb.ClipboardSync_SyncServer) error {
+	clients[stream] = true
+
+	for {
+		in, err := stream.Recv()
+		if err == io.EOF {
+			smux.Lock()
+			delete(clients, stream)
+			smux.Unlock()
+			return nil
+		}
+		if err != nil {
+			smux.Lock()
+			delete(clients, stream)
+			smux.Unlock()
+			return err
+		}
+
+		printToConsole("Server: New clipboard received")
+		propagate(in.GetData(), stream)
 	}
+}
 
-	printToConsole("New clipboard received")
+func propagate(text string, source pb.ClipboardSync_SyncServer) {
+	smux.Lock()
+	defer smux.Unlock()
 
-	err := clipboard.WriteAll(cboard)
-	if err != nil {
-		return &pb.Copied{Success: false}, err
+	for stream := range clients {
+		if stream != source {
+			stream.Send(&pb.Clipboard{Data: text})
+		}
 	}
-
-	return &pb.Copied{Success: true}, nil
 }
 
 func startServer() {
@@ -34,6 +55,8 @@ func startServer() {
 	if err != nil {
 		log.Fatalf("Failed to listen: %v\n", err)
 	}
+
+	clients = make(map[pb.ClipboardSync_SyncServer]bool)
 
 	s := grpc.NewServer()
 	pb.RegisterClipboardSyncServer(s, &csServer{})
