@@ -163,7 +163,7 @@ func syncClipoard(text string) {
 	printToConsole("Client: New clipboard sent")
 }
 
-// We have multiple threads accessing cboard, so use a mute when accessing it
+// We have multiple threads accessing cboard, so use a mutex when accessing it
 func setClipboard(cb string) bool {
 	mux.Lock()
 	defer mux.Unlock()
