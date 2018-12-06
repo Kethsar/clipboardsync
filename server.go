@@ -17,21 +17,23 @@ var clients map[pb.ClipboardSync_SyncServer]bool
 var smux sync.Mutex
 
 func (css *csServer) Sync(stream pb.ClipboardSync_SyncServer) error {
+	printToConsole("Server: Client connected")
 	clients[stream] = true
 
 	for {
 		in, err := stream.Recv()
-		if err == io.EOF {
-			smux.Lock()
-			delete(clients, stream)
-			smux.Unlock()
-			return nil
-		}
 		if err != nil {
+			printToConsole("Server: Client disconnected")
+
 			smux.Lock()
 			delete(clients, stream)
 			smux.Unlock()
-			return err
+
+			if err != io.EOF {
+				return err
+			}
+
+			return nil
 		}
 
 		printToConsole("Server: New clipboard received")

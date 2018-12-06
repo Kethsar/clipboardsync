@@ -50,38 +50,58 @@ func main() {
 	}
 
 	if c.Mode == clientMode || c.Mode == dualMode {
-		go createAndMonitorStream()
+		go startClient()
 		monitorClipboard()
 	}
 }
 
-func createAndMonitorStream() {
-	conn, err := grpc.Dial(c.Server, grpc.WithInsecure())
-	if err != nil {
-		printToConsole(fmt.Sprintf("Client: Failed to connect: %s", err))
-		return
-	}
-	defer conn.Close()
-
-	client := pb.NewClipboardSyncClient(conn)
-	stream, err = client.Sync(context.Background())
-	if err != nil {
-		printToConsole(fmt.Sprintf("Client: Error creating stream: %s", err))
-		return
-	}
-
-	printToConsole("Client: Stream opened")
+func startClient() {
+	delay := time.NewTicker(30 * time.Second)
 
 	for {
+		conn, err := grpc.Dial(c.Server, grpc.WithInsecure())
+		if err != nil {
+			printToConsole(fmt.Sprintf("Client: Failed to connect: %s", err))
+			printToConsole("Will retry in 30 seconds")
+			<-delay.C
+			continue
+		}
+
+		client := pb.NewClipboardSyncClient(conn)
+		stream, err = client.Sync(context.Background())
+		if err != nil {
+			printToConsole(fmt.Sprintf("Client: Error creating stream: %s", err))
+			printToConsole("Will retry in 30 seconds")
+			conn.Close()
+			<-delay.C
+			continue
+		}
+
+		printToConsole("Client: Stream opened")
+		monitorClientStream()
+		printToConsole("Client: Stream closed")
+
+		// Set stream to nil so we don't try to use it somewhere else
+		stream = nil
+		conn.Close()
+	}
+}
+
+// Continously monitor the stream, break when receiving errors
+func monitorClientStream() {
+	for {
 		in, err := stream.Recv()
-		if err == io.EOF {
-			printToConsole("Client: Reached end of stream")
+		if err != nil {
+			if err == io.EOF {
+				printToConsole("Client: Reached end of stream")
+			} else {
+				printToConsole(fmt.Sprintf("Client: Failed to receive clipboard: %s", err))
+			}
+
 			break
 		}
 
-		if err != nil {
-			printToConsole(fmt.Sprintf("Client: Failed to receive clipboard: %s", err))
-		} else if setClipboard(in.GetData()) {
+		if setClipboard(in.GetData()) {
 			printToConsole("Client: New clipboard received")
 
 			err = clipboard.WriteAll(cboard)
@@ -90,9 +110,6 @@ func createAndMonitorStream() {
 			}
 		}
 	}
-
-	// Set stream to nil so we know we need to re-create it
-	stream = nil
 }
 
 // Send the clipboard to the server specified in the config if it is different
