@@ -35,6 +35,7 @@ var (
 	mux    sync.Mutex
 	c      *config
 	stream pb.ClipboardSync_SyncClient
+	waitc  chan struct{}
 )
 
 func main() {
@@ -52,8 +53,10 @@ func main() {
 	}
 
 	if c.Mode == clientMode || c.Mode == dualMode {
+		waitc = make(chan struct{})
 		go startClient()
-		monitorClipboard()
+		go monitorClipboard()
+		<-waitc
 	}
 }
 
@@ -75,7 +78,7 @@ func startClient() {
 				break
 			}
 
-			printToConsole("Will retry in 30 seconds")
+			printToConsole(fmt.Sprintf("Will retry in %d seconds", delaySecs))
 			<-delay.C
 			continue
 		}
@@ -89,7 +92,7 @@ func startClient() {
 				break
 			}
 
-			printToConsole("Will retry in 30 seconds")
+			printToConsole(fmt.Sprintf("Will retry in %d seconds", delaySecs))
 			<-delay.C
 			continue
 		}
@@ -105,6 +108,7 @@ func startClient() {
 		conn.Close()
 	}
 	delay.Stop()
+	close(waitc)
 }
 
 // Continously monitor the stream, break when receiving errors
