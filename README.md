@@ -28,4 +28,4 @@ The config file is searched for using [awconf](https://github.com/awused/awconf)
   - [x] Make the Sync RPC function use streams
   - [x] Keep connection open and send data back and forth
   - [x] Client auto-attempts reconnection every X seconds when disconnected
-- Possibly encrypt the clipboard to make this safe for use if anything is not on the local network
+- [ ] Possibly encrypt the clipboard to make this safe for use if anything is not on the local network. (Honestly this is easy but then you have to get or make a cert so maybe eventually)
