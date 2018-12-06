@@ -20,6 +20,10 @@ func (css *csServer) Sync(stream pb.ClipboardSync_SyncServer) error {
 	printToConsole("Server: Client connected")
 	clients[stream] = true
 
+	if cboard != "" {
+		stream.Send(&pb.Clipboard{Data: cboard})
+	}
+
 	for {
 		in, err := stream.Recv()
 		if err != nil {
@@ -36,8 +40,10 @@ func (css *csServer) Sync(stream pb.ClipboardSync_SyncServer) error {
 			return nil
 		}
 
-		printToConsole("Server: New clipboard received")
-		propagate(in.GetData(), stream)
+		if setClipboard(in.GetData()) {
+			printToConsole("Server: New clipboard received")
+			propagate(cboard, stream)
+		}
 	}
 }
 
