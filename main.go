@@ -81,7 +81,7 @@ func startClient() {
 		conn, err := grpc.Dial(c.Server, grpc.WithInsecure())
 		if err != nil {
 			printToConsole(fmt.Sprintf("Client: Failed to connect: %s", err))
-			if attempts >= c.MaxRetries {
+			if attempts >= c.MaxRetries && c.MaxRetries != 0 {
 				break
 			}
 
@@ -95,7 +95,7 @@ func startClient() {
 		if err != nil {
 			conn.Close()
 			printToConsole(fmt.Sprintf("Client: Error creating stream: %s", err))
-			if attempts >= c.MaxRetries {
+			if attempts >= c.MaxRetries && c.MaxRetries != 0 {
 				break
 			}
 
